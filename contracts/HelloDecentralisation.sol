@@ -3,6 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract HelloDecentralisation {
     uint public secretNumber;
@@ -12,9 +13,15 @@ contract HelloDecentralisation {
         secretNumber = 666;
     }
 
-    function updateSecret(uint secretNumber_) public {
+    function updateSecret(uint secretNumber_) public returns (string memory) {
         secretNumber = secretNumber_;
         console.log("Secret Number set as %d!", secretNumber);
+
+        return
+            string.concat(
+                "Hello Decentralisation, Secret Number set as ",
+                Strings.toString(secretNumber)
+            );
     }
 
     function getSecret() public view returns (uint) {
@@ -24,7 +31,9 @@ contract HelloDecentralisation {
 
 // Pure and View Functions
 
-// Storage, calldata and memory
+// Storage [Permananty update state] ,
+// memory [Local memory, not stored in blockchain] and
+// calldata [Local memory, not stored in blockchain. Used for function arguments and return values. Helps save gas.]
 
 // payable functions
 
