@@ -53,6 +53,39 @@ contract BuyMeCoffee {
             );
     }
 
+    function withdraw() external {
+        uint256 balance = address(this).balance;
+        (bool success, bytes memory data) = payable(msg.sender).call{
+            value: balance
+        }("");
+
+        string memory revertReason;
+
+        if (!success) {
+            if (data.length > 0) {
+                // Attempt to extract a revert reason string
+                // Solidity 0.6.0+ revert reason format is 0x08c379a0 (4 bytes) + 32 bytes offset + 32 bytes length
+                require(data.length >= 68, "Invalid revert reason");
+                assembly {
+                    revertReason := add(data, 68)
+                }
+            } else {
+                revert("External call failed without revert reason");
+            }
+
+            emit Log(
+                string.concat("WITHDRAW-failure -- ", revertReason),
+                msg.sender,
+                balance,
+                ""
+            );
+        } else {
+            // External call succeeded
+
+            emit Log("WITHDRAW-Success", msg.sender, balance, "");
+        }
+    }
+
     function getCurrentBalance() public view returns (uint256) {
         return address(this).balance.toUsd();
     }
@@ -120,6 +153,6 @@ library PriceUtils {
     function toUsd(uint256 price) public view returns (uint256) {
         uint256 ethPrice = ChainlinkDataFeed.priceOf(SepoliaAddresses.eth);
 
-        return (price * ethPrice);
+        return (price * ethPrice) / 1e18;
     }
 }
